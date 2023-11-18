@@ -1,0 +1,1 @@
+python3 test_generator.py > ./../../tests/input/$1
