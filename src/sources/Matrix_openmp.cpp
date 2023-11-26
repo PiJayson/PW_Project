@@ -18,20 +18,26 @@ void Matrix::luDecomposition(std::vector<std::vector<float>>& L,
         for (int j = i; j < n; ++j) {
             U[i][j] = matrix[i][j];
 
-            //#pragma omp parallel for reduction(-:sum)
+            float sum = 0;
+            #pragma omp parallel for reduction(-:sum)
             for (int k = 0; k < i; ++k) {
-                U[i][j] -= L[i][k] * U[k][j];
+                sum -= L[i][k] * U[k][j];
             }
+            U[i][j] -= sum;
         }
 
         #pragma omp parallel for
         for (int j = i + 1; j < n; ++j) {
             L[j][i] = matrix[j][i];
 
-            //#pragma omp parallel for reduction(-:sum)
+
+            #pragma omp parallel for reduction(-:sum)
+            float sum = 0;
             for (int k = 0; k < i; ++k) {
-                L[j][i] -= L[j][k] * U[k][i];
+                sum -= L[j][k] * U[k][i];
             }
+            L[j][i] -= sum;
+            
             L[j][i] /= U[i][i];
         }
     }

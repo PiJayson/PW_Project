@@ -13,15 +13,22 @@ void Matrix::luDecomposition(std::vector<std::vector<float>>& L,
         L[i][i] = 1.0;  // Diagonal of L is 1
         for (int j = i; j < n; ++j) {
             U[i][j] = matrix[i][j];
+
+            float sum = 0;
             for (int k = 0; k < i; ++k) {
-                U[i][j] -= L[i][k] * U[k][j];
+                sum -= L[i][k] * U[k][j];
             }
+            U[i][j] -= sum;
         }
         for (int j = i + 1; j < n; ++j) {
             L[j][i] = matrix[j][i];
+
+            float sum = 0;
             for (int k = 0; k < i; ++k) {
-                L[j][i] -= L[j][k] * U[k][i];
+                sum -= L[j][k] * U[k][i];
             }
+            L[j][i] -= sum;
+
             L[j][i] /= U[i][i];
         }
     }
