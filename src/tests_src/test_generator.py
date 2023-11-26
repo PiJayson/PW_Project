@@ -2,8 +2,8 @@ from random import randint, choices
 
 NUMBER_OF_TESTS = 100
 
-MIN_SIZE = 100
-MAX_SIZE = 200
+MIN_SIZE = 400
+MAX_SIZE = 500
 
 MIN_POW = 2 ** 9
 MAX_POW = 2 ** 10
@@ -52,7 +52,7 @@ def determinant():
     print("DETERMINANT")
     
     m_1_width, m_1_height = get_matrix_size()
-    print_random_matrix(m_1_width, m_1_height)
+    print_random_matrix(m_1_width, m_1_width)
     
     return
 

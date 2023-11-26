@@ -10,16 +10,25 @@ void Matrix::luDecomposition(std::vector<std::vector<float>>& L,
     L.resize(n, std::vector<float>(n, 0));
     U.resize(n, std::vector<float>(n, 0));
 
+    #pragma omp parallel for
     for (int i = 0; i < n; ++i) {
         L[i][i] = 1.0;  // Diagonal of L is 1
+
+        #pragma omp parallel for
         for (int j = i; j < n; ++j) {
             U[i][j] = matrix[i][j];
+
+            //#pragma omp parallel for reduction(-:sum)
             for (int k = 0; k < i; ++k) {
                 U[i][j] -= L[i][k] * U[k][j];
             }
         }
+
+        #pragma omp parallel for
         for (int j = i + 1; j < n; ++j) {
             L[j][i] = matrix[j][i];
+
+            //#pragma omp parallel for reduction(-:sum)
             for (int k = 0; k < i; ++k) {
                 L[j][i] -= L[j][k] * U[k][i];
             }
@@ -37,6 +46,7 @@ long long Matrix::determinant() {
     luDecomposition(L, U);
 
     double det = 1.0;
+    #pragma omp parallel for reduction(*:det)
     for (int i = 0; i < width; ++i) {
         det *= U[i][i];
     }
@@ -46,8 +56,6 @@ long long Matrix::determinant() {
 
 Matrix& Matrix::operator=(const Matrix& other) {
     if (this != &other) {
-        // Check for self-assignment to avoid unnecessary work
-
         // Clear current matrix data, if any
         matrix.clear();
 
@@ -70,7 +78,6 @@ Matrix& Matrix::operator=(const Matrix& other) {
 bool operator+(Matrix& A, const Matrix& B) {
     if (A.width != B.width || A.height != B.height) return false;
 
-    // Perform element-wise addition
     #pragma omp parallel for
     for (int i = 0; i < A.height; ++i) {
         for (int j = 0; j < A.width; ++j) {
@@ -106,6 +113,46 @@ bool operator*(Matrix& A, const Matrix& B) {
     return true;
 }
 
+/*
+void matrix_power_recursive(const Matrix& base, long long exp, int size, Matrix& result) {
+    if (exp == 0) {
+        result.set_identity(size);
+        return;
+    }
+
+    Matrix temp_result;
+    
+    if (exp % 2 == 1) {
+        #pragma omp task shared(base, temp_result) if(exp > 1)
+        matrix_power_recursive(base, exp - 1, size, temp_result);
+
+        #pragma omp taskwait
+        temp_result * base;
+    } else {
+        #pragma omp task shared(base, temp_result) if(exp > 1)
+        matrix_power_recursive(base, exp / 2, size, temp_result);
+
+        #pragma omp taskwait
+        temp_result * temp_result;
+    }
+    result = temp_result;
+}
+
+bool operator^(Matrix& A, long long p) {
+    if (A.width != A.height) {
+        return false;
+    }
+
+    Matrix result;
+    result.set_identity(A.width);
+
+    matrix_power_recursive(A, p, A.width, result);
+
+    A = result;  // Update the current instance with the result
+    return true;
+}
+*/
+
 bool operator^(Matrix& A, long long p) {
     if (A.width != A.height) {
         return false;
@@ -119,11 +166,11 @@ bool operator^(Matrix& A, long long p) {
             result * A;
         }
 
-        A * A;  // Square A for the next iteration
+        A * A;
         p /= 2;
     }
 
-    A = result;  // Update the current instance with the result
+    A = result;
     return true;
 }
 

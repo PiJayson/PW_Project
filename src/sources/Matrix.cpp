@@ -20,5 +20,3 @@ void Matrix::set_identity(int size) {
         matrix[i][i] = 1;
     }
 }
-
-// Implement other member functions and friend functions here.

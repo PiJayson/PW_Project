@@ -45,8 +45,6 @@ long long Matrix::determinant() {
 
 Matrix& Matrix::operator=(const Matrix& other) {
     if (this != &other) {
-        // Check for self-assignment to avoid unnecessary work
-
         // Clear current matrix data, if any
         matrix.clear();
 
@@ -68,7 +66,6 @@ Matrix& Matrix::operator=(const Matrix& other) {
 bool operator+(Matrix& A, const Matrix& B) {
     if (A.width != B.width || A.height != B.height) return false;
 
-    // Perform element-wise addition
     for (int i = 0; i < A.height; ++i) {
         for (int j = 0; j < A.width; ++j) {
             A.matrix[i][j] += B.matrix[i][j];
@@ -114,11 +111,11 @@ bool operator^(Matrix& A, long long p) {
             result * A;
         }
 
-        A * A;  // Square A for the next iteration
+        A * A;
         p /= 2;
     }
 
-    A = result;  // Update the current instance with the result
+    A = result;
     return true;
 }
 
